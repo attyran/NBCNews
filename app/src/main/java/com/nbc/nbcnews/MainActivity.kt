@@ -10,6 +10,10 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
+import android.support.design.widget.TabLayout
+
+import kotlinx.android.synthetic.main.activity_main.*
+
 class MainActivity : AppCompatActivity() {
     val CONNECTON_TIMEOUT_MILLISECONDS = 60000
 
@@ -18,27 +22,36 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         GetNewsAsyncTask().execute("http://msgviewer.nbcnewstools.net:9207/v1/query/curation/news/?size=2")
+
+        setSupportActionBar(toolbar)
+        configureTabLayout()
     }
 
-    data class NewsResponse(
-            val id: String,
-            val type: String,
-            val header: String,
-            val showMore: Boolean,
-            val items: List<Item>
-    )
+    private fun configureTabLayout() {
+        tab_layout.addTab(tab_layout.newTab().setText("Articles"))
+        tab_layout.addTab(tab_layout.newTab().setText("Videos"))
+        tab_layout.addTab(tab_layout.newTab().setText("Slideshows"))
 
-    data class Item(
-            val id: String,
-            val type: String,
-            val url: String,
-            val headline: String,
-            val published: String,
-            val tease: String,
-            val summary: String,
-            val label: String,
-            val breaking: Boolean
-    )
+        val adapter = TabPagerAdapter(supportFragmentManager, tab_layout.tabCount);
+        pager.adapter = adapter
+
+        pager.addOnPageChangeListener(
+                TabLayout.TabLayoutOnPageChangeListener(tab_layout))
+        tab_layout.addOnTabSelectedListener(object :
+                TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                pager.currentItem = tab.position
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab) {
+
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab) {
+
+            }
+        })
+    }
 
     inner class GetNewsAsyncTask : AsyncTask<String, Void, NewsResponse>() {
         override fun onPreExecute() {
@@ -79,6 +92,26 @@ class MainActivity : AppCompatActivity() {
             // handle render
         }
     }
+
+    data class NewsResponse(
+            val id: String,
+            val type: String,
+            val header: String,
+            val showMore: Boolean,
+            val items: List<Item>
+    )
+
+    data class Item(
+            val id: String,
+            val type: String,
+            val url: String,
+            val headline: String,
+            val published: String,
+            val tease: String,
+            val summary: String,
+            val label: String,
+            val breaking: Boolean
+    )
 
     fun streamToString(inputStream: InputStream): String {
 
