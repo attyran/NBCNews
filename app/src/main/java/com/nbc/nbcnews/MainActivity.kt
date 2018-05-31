@@ -21,10 +21,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        GetNewsAsyncTask().execute("http://msgviewer.nbcnewstools.net:9207/v1/query/curation/news/?size=2")
-
         setSupportActionBar(toolbar)
         configureTabLayout()
+
+        GetNewsAsyncTask().execute("http://msgviewer.nbcnewstools.net:9207/v1/query/curation/news/?size=2")
     }
 
     private fun configureTabLayout() {
@@ -35,10 +35,8 @@ class MainActivity : AppCompatActivity() {
         val adapter = TabPagerAdapter(supportFragmentManager, tab_layout.tabCount);
         pager.adapter = adapter
 
-        pager.addOnPageChangeListener(
-                TabLayout.TabLayoutOnPageChangeListener(tab_layout))
-        tab_layout.addOnTabSelectedListener(object :
-                TabLayout.OnTabSelectedListener {
+        pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tab_layout))
+        tab_layout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 pager.currentItem = tab.position
             }
@@ -89,7 +87,14 @@ class MainActivity : AppCompatActivity() {
             if (news == null) {
                 return
             }
-            // handle render
+
+            for (newsItem in news.items) {
+                if (newsItem.type == "article") {
+                    NewsManager.instance.articlesList.add(newsItem)
+                }
+            }
+            NewsManager.instance.articleAdapter?.updateArticles(NewsManager.instance.articlesList)
+            NewsManager.instance.articleAdapter?.notifyDataSetChanged()
         }
     }
 
